@@ -50,7 +50,7 @@ pipeline {
     
     post {
         always {
-            mvn 'clean'
+            sh 'mvn clean'
         }
     }
 }

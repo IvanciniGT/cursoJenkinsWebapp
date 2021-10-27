@@ -2,7 +2,11 @@
 pipeline {
     
     // En que agente se va a ejecutar este job
-    agent any;
+    agent {
+        docker {
+            image maven:3.8.3-openjdk-8
+        }
+    }
     
     // Y otras cosas...
     

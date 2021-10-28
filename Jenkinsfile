@@ -48,11 +48,23 @@ node {
                 archiveArtifacts artifacts: 'target/webapp.war', followSymlinks: false
             }
         }
+
+        stage('Crear entorno de prueba') {
+            // Aqui podría crear el contenedor... que problema tendría?
+            // Las tareas se harían secucialmente
+            // En algun escenario me podría interesar arrancarlo en pararelo
+            sh '''
+                ID_CONTENEDOR=$ ( docker container create  \
+                    -e ALLOW_EMPTY_PASSWORD=yes \
+                    -e TOMCAT_ALLOW_REMOTE_MANAGEMENT=yes\
+                    -v $PWD/tomcat/tomcat-users.xml:/opt/bitnami/tomcat/conf/tomcat-users.xml \
+                    bitnami/tomcat:latest )
+                docker start ${ID_CONTENEDOR}
+                docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${ID_CONTENEDOR}
+
+            '''
+        }
         stage('Despliegue') {
-            
-            sh 'docker container create' --->
-            sh 'docker start IDCONTENEDOR'---> IP
-        
             echo 'Despliego el fichero WAR'
             deploy( adapters : [ tomcat9 (url: "http://172.31.3.123:8080", 
                                           credentialsId: "tomcat-user") ], 

@@ -28,8 +28,8 @@ if (this.params.getOrDefault('VERSION_DEL_PIPELINE',"-1")!=VERSION_DEL_PIPELINE)
 // Aquí empiezan las tareas propias de mi pipeline
 node {
     checkout scm
-    docker.image('maven:3.8.3-openjdk-8').inside {
-        try{
+    try{
+        docker.image('maven:3.8.3-openjdk-8').inside {
             stage('Compilación') {
                 sh 'mvn compile'
             }
@@ -57,18 +57,24 @@ node {
                         contextPath: "miapp"
                 )
             }
-            stage('Probar despliegue') {
-                echo 'Lo pruebo, el despliegue'
-                sh '''#!/bin/bash
-                      sleep 5
-                       [[ $(curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
-                   '''
-            }
         }
-        finally {
-            stage ("Limpieza del workspace") {
+// Otro contenedor            
+        stage('Probar despliegue') {
+            def entornoConCurl = docker.build 'entorno-curl:latest'
+            entornoConCurl.inside {
+                    echo 'Lo pruebo, el despliegue'
+                    sh '''#!/bin/bash
+                          sleep 5
+                           [[ $(curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
+                       '''
+            }   
+        }
+    }
+    finally {
+        stage ("Limpieza del workspace") {
+            docker.image('maven:3.8.3-openjdk-8').inside {
                 sh 'mvn clean'
-            }
+            }    
         }
     }
 }

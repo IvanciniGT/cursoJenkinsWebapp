@@ -1,60 +1,84 @@
-// El primer elemento en un pipeline declarativo es pipeline
-pipeline {
-    
-    // En que agente se va a ejecutar este job
-    agent {
-        docker {
-            image "maven:3.8.3-openjdk-8"
-        }
+// Plantilla de PIPELINE.
+// Autor: IvanciniGT
+
+// Al cambiar la verisón sólo se recarga la configuración del proyecto... pero no se ejecutarán las tareas
+VERSION_DEL_PIPELINE="0"
+
+// Añadir aquí los parámetros del pipeline
+PARAMETROS_DE_MI_PIPELINE=[
+    // booleanParam (defaultValue: true, description: 'Descripción de mi parámetro', name: 'MI_PARAM_BOOLEAN'),
+    // string(defaultValue: 'valor por defecto', description: 'Descripción de mi parámetro de texto', name: 'MI_PARAM_TEXTO'),
+    // choice(choices: ['Valor1', 'Valor2', 'Valor3'], description: 'Descripción de mi parámetro', name: 'MI_PARAM_LISTA')
+]
+
+// Añadir aquí los parámetros del pipeline
+TRIGGERS_DE_MI_PIPELINE=[
+    //cron("* * * * *"),                                                        // Ejecutar cada minuto
+    //pollSCM("* * * * *")                                                      // Ejecutar cuando cambie algo en GIT
+    //upstream(upstreamProjects: 'PROYECTO_DISPARADOR', threshold: 'FAILURE')   // Ejecutar tras otro proyecto (Incluso si falla)
+]
+
+// No tocar este trozo... es el que hace la magia
+if (this.params.getOrDefault('VERSION_DEL_PIPELINE',"-1")!=VERSION_DEL_PIPELINE){
+    stage('Configuración del JOB'){
+        creoConfiguracion()
     }
-    
-    // Y otras cosas...
-    
-    // Etapas tiene mi pipeline. BIEN !!! PUEDO TENER VARIAS
-    stages {
+    return
+}
+// Aquí empiezan las tareas propias de mi pipeline
+node {
+    try{
         stage('Compilación') {
-            steps {
-                sh 'mvn compile'
-            }
+            sh 'mvn compile'
         }
         stage('Pruebas') {
-            steps {
+            try{
                 sh 'mvn test'
             }
-            post {
-                always {
-                    echo 'Publico los resultados de los test'
-                    junit 'target/surefire-reports/*.xml'
-                }
+            finally{
+                echo 'Publico los resultados de los test'
+                junit 'target/surefire-reports/*.xml'
             }
         }
         stage('Empaquetado') {
-            steps {
-                sh 'mvn package'
-            }
-            post {
-                success {
-                    echo 'Guardo el fichero WAR'
-                    archiveArtifacts artifacts: 'target/webapp.war', followSymlinks: false
-                }
-            }
+            sh 'mvn package'
+            echo 'Guardo el fichero WAR'
+            archiveArtifacts artifacts: 'target/webapp.war', followSymlinks: false
         }
         stage('Despliegue') {
-            steps {
-                echo 'Despliego el fichero WAR'
-                echo 'Lo pruebo, el despliegue'
-            }
-            post {
-                always {
-                    echo 'Restauro el Tomcat'
-                }
-            }
+            echo 'Despliego el fichero WAR'
+            echo 'Lo pruebo, el despliegue'
+            echo 'Restauro el Tomcat'
         }
     }
-    
-    post {
-        always {
+    finally {
+        stage ("Limpieza del workspace") {
             sh 'mvn clean'
         }
     }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// Función que crea la configuración. NO TOCAR si no sabes lo que estás haciendo ;)
+def creoConfiguracion(){
+    properties(
+        [
+            parameters(
+                [
+                    choice(name: 'VERSION_DEL_PIPELINE', description: 'Version del pipeline instalada', choices: [ VERSION_DEL_PIPELINE ])
+                ] + PARAMETROS_DE_MI_PIPELINE
+            ),
+            pipelineTriggers( TRIGGERS_DE_MI_PIPELINE )
+        ]
+    )
 }

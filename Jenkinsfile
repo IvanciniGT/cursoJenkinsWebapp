@@ -76,7 +76,8 @@ node {
 
         }
         stage('Despliegue') {
-            echo 'Despliego el fichero WAR'
+            echo "Despliego el fichero WAR en ${env.IP_CONTENEDOR}"
+            echo "Despliego el fichero WAR en ${IP_CONTENEDOR}"
             deploy( adapters : [ tomcat9 (url: "http://${env.IP_CONTENEDOR}:8080", 
                                           credentialsId: "tomcat-user") ], 
                     war: "target/webapp.war",

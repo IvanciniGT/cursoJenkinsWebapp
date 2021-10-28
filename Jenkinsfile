@@ -62,7 +62,7 @@ node {
                       sleep 5
                       curl http://172.31.3.123:8081/miapp/
                       curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola
-                       [[ $(curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola ) != 1 ]] && exit 1
+                       [[ $(curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola ) != 1 ]] && echo ERROR || echo GUAY
                    '''
                 // JMETER
                 echo 'Restauro el Tomcat'

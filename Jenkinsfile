@@ -60,9 +60,7 @@ node {
                 echo 'Lo pruebo, el despliegue'
                 sh '''#!/bin/bash
                       sleep 5
-                      curl http://172.31.3.123:8081/miapp/
-                      curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola
-                       [[ $(curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
+                       [[ $(curl -s http://172.31.3.123:8081/miapp/ | grep -c Holitaa ) != 1 ]] && exit 1 || exit 0
                    '''
                 // JMETER
                 echo 'Restauro el Tomcat'

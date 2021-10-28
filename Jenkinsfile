@@ -92,7 +92,7 @@ node {
                     echo 'Lo pruebo, el despliegue'
                     sh """#!/bin/bash
                           sleep 5
-                           [[ $(curl -s http://${IP_CONTENEDOR}:8080/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
+                           [[ $$(curl -s http://${IP_CONTENEDOR}:8080/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
                        """
             }   
         }

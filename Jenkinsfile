@@ -27,35 +27,36 @@ if (this.params.getOrDefault('VERSION_DEL_PIPELINE',"-1")!=VERSION_DEL_PIPELINE)
 }
 // Aquí empiezan las tareas propias de mi pipeline
 node {
-    try{
-        checkout scm
-        //checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'MiCredencialGitHub', url: 'https://github.com/IvanciniGT/cursoJenkinsWebapp.git']]])
-        stage('Compilación') {
-            sh 'mvn compile'
-        }
-        stage('Pruebas') {
-            try{
-                sh 'mvn test'
+    checkout scm
+    docker.image('maven:3.8.3-openjdk-8').inside{
+        try{
+            stage('Compilación') {
+                sh 'mvn compile'
             }
-            finally{
-                echo 'Publico los resultados de los test'
-                junit 'target/surefire-reports/*.xml'
+            stage('Pruebas') {
+                try{
+                    sh 'mvn test'
+                }
+                finally{
+                    echo 'Publico los resultados de los test'
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+            stage('Empaquetado') {
+                sh 'mvn package'
+                echo 'Guardo el fichero WAR'
+                archiveArtifacts artifacts: 'target/webapp.war', followSymlinks: false
+            }
+            stage('Despliegue') {
+                echo 'Despliego el fichero WAR'
+                echo 'Lo pruebo, el despliegue'
+                echo 'Restauro el Tomcat'
             }
         }
-        stage('Empaquetado') {
-            sh 'mvn package'
-            echo 'Guardo el fichero WAR'
-            archiveArtifacts artifacts: 'target/webapp.war', followSymlinks: false
-        }
-        stage('Despliegue') {
-            echo 'Despliego el fichero WAR'
-            echo 'Lo pruebo, el despliegue'
-            echo 'Restauro el Tomcat'
-        }
-    }
-    finally {
-        stage ("Limpieza del workspace") {
-            sh 'mvn clean'
+        finally {
+            stage ("Limpieza del workspace") {
+                sh 'mvn clean'
+            }
         }
     }
 }

@@ -53,20 +53,31 @@ node {
             // Aqui podría crear el contenedor... que problema tendría?
             // Las tareas se harían secucialmente
             // En algun escenario me podría interesar arrancarlo en pararelo
-            sh '''
-                ID_CONTENEDOR=$ ( docker container create  \
-                    -e ALLOW_EMPTY_PASSWORD=yes \
-                    -e TOMCAT_ALLOW_REMOTE_MANAGEMENT=yes\
-                    -v $PWD/tomcat/tomcat-users.xml:/opt/bitnami/tomcat/conf/tomcat-users.xml \
-                    bitnami/tomcat:latest )
-                docker start ${ID_CONTENEDOR}
-                docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${ID_CONTENEDOR}
+                env.ID_CONTENEDOR = sh( 
+                    script: '''
+                        docker container create  \
+                            -e ALLOW_EMPTY_PASSWORD=yes \
+                            -e TOMCAT_ALLOW_REMOTE_MANAGEMENT=yes\
+                            -v $PWD/tomcat/tomcat-users.xml:/opt/bitnami/tomcat/conf/tomcat-users.xml \
+                            bitnami/tomcat:latest
+                            ''',
+                    returnStdout: true
+                ).trim()
+                
+                echo "El contenedor de tomcat tiene como ID: ${ID_CONTENEDOR}"
+                    
+                sh "docker start ${ID_CONTENEDOR}"
+                
+                env.IP_CONTENEDOR = sh( 
+                    script: "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${ID_CONTENEDOR}",
+                    returnStdout: true
+                ).trim()
+                echo "El contenedor de tomcat está arrancado en la IP: ${IP_CONTENEDOR}"
 
-            '''
         }
         stage('Despliegue') {
             echo 'Despliego el fichero WAR'
-            deploy( adapters : [ tomcat9 (url: "http://172.31.3.123:8080", 
+            deploy( adapters : [ tomcat9 (url: "http://${IP_CONTENEDOR}:8080", 
                                           credentialsId: "tomcat-user") ], 
                     war: "target/webapp.war",
                     contextPath: "miapp"
@@ -79,10 +90,10 @@ node {
             def entornoConCurl = docker.build 'entorno-curl:latest'
             entornoConCurl.inside {
                     echo 'Lo pruebo, el despliegue'
-                    sh '''#!/bin/bash
+                    sh """#!/bin/bash
                           sleep 5
-                           [[ $(curl -s http://172.31.3.123:8080/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
-                       '''
+                           [[ $(curl -s http://${IP_CONTENEDOR}:8080/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
+                       """
             }   
         }
     }
@@ -91,6 +102,12 @@ node {
             docker.image('maven:3.8.3-openjdk-8').inside {
                 sh 'mvn clean'
             }    
+            try{
+                sh "docker rm ${ID_CONTENEDOR} -f"
+            }
+            catch(exc){
+                echo 'Parece que no hemos podido borrar el contenedor'
+            }
         }
     }
 }

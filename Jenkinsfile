@@ -58,7 +58,7 @@ node {
                         docker container create  \
                             -e ALLOW_EMPTY_PASSWORD=yes \
                             -e TOMCAT_ALLOW_REMOTE_MANAGEMENT=yes\
-                            -v $PWD/tomcat/tomcat-users.xml:/opt/bitnami/tomcat/conf/tomcat-users.xml \
+                            -v "$PWD/tomcat/tomcat-users.xml:/opt/bitnami/tomcat/conf/tomcat-users.xml" \
                             bitnami/tomcat:latest
                             ''',
                     returnStdout: true

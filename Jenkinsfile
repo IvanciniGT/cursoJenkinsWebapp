@@ -28,7 +28,7 @@ if (this.params.getOrDefault('VERSION_DEL_PIPELINE',"-1")!=VERSION_DEL_PIPELINE)
 // Aquí empiezan las tareas propias de mi pipeline
 node {
     checkout scm
-    docker.image('maven:3.8.3-openjdk-8').inside{
+    docker.image('maven:3.8.3-openjdk-8').inside {
         try{
             stage('Compilación') {
                 sh 'mvn compile'
@@ -49,6 +49,14 @@ node {
             }
             stage('Despliegue') {
                 echo 'Despliego el fichero WAR'
+                
+                
+                deploy( adapters : [ tomcat9 (url: "http://172.31.3.123:8081", 
+                                              credentialsId: "tomcat-user") ], 
+                        war: "target/webapp.war",
+                        contextPath: "miapp"
+                )
+                
                 echo 'Lo pruebo, el despliegue'
                 echo 'Restauro el Tomcat'
             }

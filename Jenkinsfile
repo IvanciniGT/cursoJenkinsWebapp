@@ -64,7 +64,7 @@ node {
                     returnStdout: true
                 ).trim()
                 
-                echo "El contenedor de tomcat tiene como ID: ${ID_CONTENEDOR}"
+                echo 'El contenedor de tomcat tiene como ID: ${ID_CONTENEDOR}'
                     
                 sh "docker start ${ID_CONTENEDOR}"
                 
@@ -77,7 +77,7 @@ node {
         }
         stage('Despliegue') {
             echo 'Despliego el fichero WAR'
-            deploy( adapters : [ tomcat9 (url: "http://${IP_CONTENEDOR}:8080", 
+            deploy( adapters : [ tomcat9 (url: "http://${env.IP_CONTENEDOR}:8080", 
                                           credentialsId: "tomcat-user") ], 
                     war: "target/webapp.war",
                     contextPath: "miapp"

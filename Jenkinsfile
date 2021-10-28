@@ -47,25 +47,29 @@ node {
                 echo 'Guardo el fichero WAR'
                 archiveArtifacts artifacts: 'target/webapp.war', followSymlinks: false
             }
-            stage('Despliegue') {
-                echo 'Despliego el fichero WAR'
-                
-                
-                deploy( adapters : [ tomcat9 (url: "http://172.31.3.123:8081", 
-                                              credentialsId: "tomcat-user") ], 
-                        war: "target/webapp.war",
-                        contextPath: "miapp"
-                )
-            }
         }
+        stage('Despliegue') {
+            
+            sh 'docker container create' --->
+            sh 'docker start IDCONTENEDOR'---> IP
+        
+            echo 'Despliego el fichero WAR'
+            deploy( adapters : [ tomcat9 (url: "http://172.31.3.123:8080", 
+                                          credentialsId: "tomcat-user") ], 
+                    war: "target/webapp.war",
+                    contextPath: "miapp"
+            )
+        }
+
 // Otro contenedor            
         stage('Probar despliegue') {
+            
             def entornoConCurl = docker.build 'entorno-curl:latest'
             entornoConCurl.inside {
                     echo 'Lo pruebo, el despliegue'
                     sh '''#!/bin/bash
                           sleep 5
-                           [[ $(curl -s http://172.31.3.123:8081/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
+                           [[ $(curl -s http://172.31.3.123:8080/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
                        '''
             }   
         }

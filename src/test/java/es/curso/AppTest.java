@@ -88,8 +88,50 @@ public class AppTest
         int resultado=App.menor(5,5);
         assertEquals( resultado, 5 );
     }
+    
+    
+    
+    @Test
+    public void pruebaTriple(){
+        int resultado=App.triple(6);
+        assertEquals( resultado, 18 );
+    }
+    
+    @Test
+    public void pruebaTriple2(){
+        int resultado=App.triple(-6);
+        assertEquals( resultado, -18 );
+    }
+    
+    @Test
+    public void pruebaTriple3(){
+        int resultado=App.triple(0);
+        assertEquals( resultado, 0 );
+    }
+    
 
     /*
         METODOLOGIA Test Driven Development
     */
+    
+    
+    @Test
+    public void pruebaCuadruple(){
+        int resultado=App.cuadruple(6);
+        assertEquals( resultado, 24 );
+    }
+    //#log4j
+    @Test
+    public void pruebaCuadruple2(){
+        int resultado=App.cuadruple(-6);
+        assertEquals( resultado, -24 );
+    }
+    
+    @Test
+    public void pruebaCuadruple3(){
+        int resultado=App.cuadruple(0);
+        assertEquals( resultado, 0 );
+    }
+    
+    
 }

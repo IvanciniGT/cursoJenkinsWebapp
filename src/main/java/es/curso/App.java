@@ -8,12 +8,24 @@ public class App
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hola Jenkins!" );
+        //System.out.println( "Resultado:" + triple(-2) );
+        
     }
     
     public static int doblar( int numero )
     {
+        return numero*2;
+    }
+    
+    
+    public static int triple( int numero )
+    {
         return numero*3;
+    }
+    
+    public static int cuadruple( int numero )
+    {
+        return numero*4;
     }
     
     public static int mayor( int numero1, int numero2 )
@@ -33,3 +45,4 @@ public class App
         return numero1 < numero2 ? numero1 : numero2 ;
     }
 }
+//byte-code

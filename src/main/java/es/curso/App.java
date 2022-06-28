@@ -25,7 +25,7 @@ public class App
     
     public static int cuadruple( int numero )
     {
-        return numero+4;
+        return numero*4;
     }
     
     public static int mayor( int numero1, int numero2 )

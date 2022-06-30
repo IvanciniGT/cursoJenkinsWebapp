@@ -56,6 +56,7 @@ node {
                 env.ID_CONTENEDOR = sh( 
                     script: '''
                         docker container create  \
+                            -u root \
                             -e ALLOW_EMPTY_PASSWORD=yes \
                             -e TOMCAT_ALLOW_REMOTE_MANAGEMENT=yes\
                             -v "$PWD/tomcat/tomcat-users.xml:/opt/bitnami/tomcat/conf/tomcat-users.xml" \

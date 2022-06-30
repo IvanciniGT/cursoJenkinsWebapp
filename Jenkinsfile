@@ -2,7 +2,7 @@
 // Autor: IvanciniGT
 
 // Al cambiar la verisón sólo se recarga la configuración del proyecto... pero no se ejecutarán las tareas
-VERSION_DEL_PIPELINE="0"
+VERSION_DEL_PIPELINE="1"
 
 // Añadir aquí los parámetros del pipeline
 PARAMETROS_DE_MI_PIPELINE=[

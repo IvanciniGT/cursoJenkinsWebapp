@@ -49,54 +49,6 @@ node {
             }
         }
 
-        stage('Crear entorno de prueba') {
-            // Aqui podría crear el contenedor... que problema tendría?
-            // Las tareas se harían secucialmente
-            // En algun escenario me podría interesar arrancarlo en pararelo
-                env.ID_CONTENEDOR = sh( 
-                    script: '''
-                        docker container create  \
-                            -u root \
-                            -e ALLOW_EMPTY_PASSWORD=yes \
-                            -e TOMCAT_ALLOW_REMOTE_MANAGEMENT=yes\
-                            -v "$PWD/tomcat/tomcat-users.xml:/opt/bitnami/tomcat/conf/tomcat-users.xml" \
-                            bitnami/tomcat:latest
-                            ''',
-                    returnStdout: true
-                ).trim()
-                
-                echo 'El contenedor de tomcat tiene como ID: ${ID_CONTENEDOR}'
-                    
-                sh "docker start ${ID_CONTENEDOR}"
-                
-                env.IP_CONTENEDOR = sh( 
-                    script: "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${ID_CONTENEDOR}",
-                    returnStdout: true
-                ).trim()
-                echo "El contenedor de tomcat está arrancado en la IP: ${IP_CONTENEDOR}"
-
-        }
-        stage('Despliegue') {
-            sh 'sleep 5'
-            deploy( adapters : [ tomcat9 (url: "http://"+env.IP_CONTENEDOR+":8080", 
-                                          credentialsId: "tomcat-user") ], 
-                    war: "target/webapp.war",
-                    contextPath: "miapp"
-            )
-        }
-
-// Otro contenedor            
-        stage('Probar despliegue') {
-            
-            def entornoConCurl = docker.build 'entorno-curl:latest'
-            entornoConCurl.inside {
-                    echo 'Lo pruebo, el despliegue'
-                    sh '''#!/bin/bash
-                          sleep 5
-                           [[ $(curl -s http://${IP_CONTENEDOR}:8080/miapp/ | grep -c Hola ) != 1 ]] && exit 1 || exit 0
-                       '''
-            }   
-        }
     }
     finally {
         stage ("Limpieza del workspace") {
